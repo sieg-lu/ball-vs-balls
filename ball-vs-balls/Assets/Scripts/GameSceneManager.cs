@@ -23,7 +23,10 @@ public class GameSceneManager : MonoBehaviour
 
     // ----------- helper functions
 
-    private bool IsPlayerGrid(int gridX, int gridZ, out int playerId)
+    private bool IsPlayerGrid(
+        int gridX,
+        int gridZ,
+        out int playerId)
     {
         bool result = false;
         playerId = -1;

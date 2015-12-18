@@ -9,6 +9,11 @@ public class PlayerController : Player
         base.Initialize2(myId, sceneManager);
     }
 
+    public override void Update2()
+    {
+        base.Update2();
+    }
+
     void Start()
     {
         

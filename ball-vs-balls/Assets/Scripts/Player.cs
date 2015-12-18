@@ -36,13 +36,15 @@ public class Player : MonoBehaviour
 
     // ----------- callback functions
 
-    public virtual void Initialize2(int myId, GameObject sceneManager)
+    public virtual void Initialize2(
+        int myId,
+        GameObject sceneManager)
     {
         mMyId = myId;
         mSceneManager = sceneManager;
     }
 
-    public void Update2()
+    public virtual void Update2()
     {
 
     }
@@ -54,10 +56,10 @@ public class Player : MonoBehaviour
         // Only used for asserts
         Assert.IsTrue(sceneManager != null);
         Assert.IsTrue(sceneManager.GetComponent<GameSceneManager>() != null);
-	}
+    }
 	
 	void Update()
     {
-	
-	}
+    
+    }
 }
