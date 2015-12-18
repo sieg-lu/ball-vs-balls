@@ -19,11 +19,35 @@ public class GameSceneManager : MonoBehaviour
     public int width = 50;
     public int height = 50;
 
+    public GameObject[] players;
+
     // ----------- helper functions
+
+    private bool IsPlayerGrid(int gridX, int gridZ, out int playerId)
+    {
+        bool result = false;
+        playerId = -1;
+
+        for (int playerIndex= 0; !result && playerIndex < players.Length; playerIndex++)
+        {
+            Player playerComponent = players[playerIndex].GetComponent<Player>();
+            if (gridX == playerComponent.startGridX && gridZ == playerComponent.startGridZ)
+            {
+                playerId = playerIndex;
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
     private void SetupScene()
     {
         Assert.IsTrue(width > 0 && width < kMaxWidth);
         Assert.IsTrue(height > 0 && height < kMaxHeight);
+
+        Assert.IsTrue(normalBrick != null);
+//        Assert.IsTrue(wallBrick != null);
 
         float start_x = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (-width / 2.0f);
         float start_z = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (-height / 2.0f);
@@ -47,26 +71,57 @@ public class GameSceneManager : MonoBehaviour
                  j < height;
                  j++, current_z += (mNormalBrickSize.z + kIntervalBetweenBlocks))
             {
-                Vector3 position = new Vector3(current_x, mNormalBrickSize.y / 2.0f + 0.05f, current_z);
-                GameObject current_brick = (GameObject)Instantiate(normalBrick, position, Quaternion.identity);
+                int playerId = -1;
+                bool isPlayerGrid = IsPlayerGrid(i, j, out playerId);
+                
+                Vector3 position = new Vector3(current_x, mNormalBrickSize.y / 2.0f + 0.01f, current_z);
+                if (isPlayerGrid)
+                {
+                    Assert.IsTrue(playerId != -1);
 
-                current_brick.name = "brick" + (i * height + j + 1).ToString();
-                current_brick.transform.parent = mBricksRoot.transform;
+                    GameObject currentPlayer = (GameObject)Instantiate(players[playerId], position, Quaternion.identity);
+                    Player playerComponent = players[playerId].GetComponent<Player>();
+
+                    currentPlayer.name = playerComponent.IsController() ? "Control" : "Enemy " + playerId;
+                }
+                else
+                {
+                    GameObject currentBrick = (GameObject)Instantiate(normalBrick, position, Quaternion.identity);
+
+                    currentBrick.name = "brick" + (i * height + j + 1).ToString();
+                    currentBrick.transform.parent = mBricksRoot.transform;
+                }
             }
         }
     }
-    
-    // ----------- callback functions
-    void Start()
+
+    void Initialize2()
     {
         mNormalBrickSize = normalBrick.transform.localScale;
         Debug.Log("normal brick's size: " + mNormalBrickSize.ToString());
+    }
+    
+    // ----------- main functions
+    void Start()
+    {
+        // Initialize section
+        Initialize2();
+
+        for (int playerIndex= 0; playerIndex < players.Length; playerIndex++)
+        {
+            players[playerIndex].GetComponent<Player>().Initialize2(playerIndex, gameObject);
+        }
+
+        // Gameplay section
 
         SetupScene();
     }
-	
-	void Update()
+
+    void Update()
     {
-	
-	}
+        for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
+        {
+            players[playerIndex].GetComponent<Player>().Update2();
+        }
+    }
 }
