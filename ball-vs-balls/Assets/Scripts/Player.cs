@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Assertions;
+using UnityStandardAssets.CrossPlatformInput;
+using UnityStandardAssets.Vehicles.Ball;
 
-public class Player : MonoBehaviour
+public abstract class Player : MonoBehaviour
 {
     // ----------- private variables
 
@@ -10,6 +12,12 @@ public class Player : MonoBehaviour
     protected GameObject mSceneManager;
 
     protected ePlayerType isController = ePlayerType._playerTypeInvalid;
+    protected GameObject mLight;
+    protected Light mLightComponent;
+
+    private Ball mBall;
+    protected Vector3 mMove;
+    protected bool mJump = false;
 
     // ----------- public variables
 
@@ -32,7 +40,27 @@ public class Player : MonoBehaviour
         return isController == ePlayerType._playerTypeController;
     }
 
-    // ----------- callback functions
+    protected void SpawnSpotLight()
+    {
+        mLight = new GameObject(name + "Light");
+        mLight.transform.Rotate(new Vector3(1.0f, 0, 0), 90.0f);
+        mLightComponent = mLight.AddComponent<Light>();
+        mLightComponent.type = LightType.Spot;
+        mLightComponent.spotAngle = 30.0f;
+        mLightComponent.transform.position = gameObject.transform.position;
+    }
+
+    protected abstract void PostSpawnSpotLight();
+
+    protected void FixSpotLightPosition()
+    {
+        mLight.transform.position = new Vector3(
+            transform.position.x,
+            transform.position.y + 2.0f,
+            transform.position.z);
+    }
+
+    // ----------- main functions
 
     public virtual void Initialize2(
         int inId,
@@ -40,11 +68,23 @@ public class Player : MonoBehaviour
     {
         mMyId = inId;
         mSceneManager = inSceneManager;
+
+        mBall = GetComponent<Ball>();
+        mBall.Initialize2();
+
+        SpawnSpotLight();
     }
 
     public virtual void Update2()
     {
 
+    }
+
+    public virtual void SyncUpdate2()
+    {
+        FixSpotLightPosition();
+        mBall.Move(mMove, mJump);
+        mJump = false;
     }
 
     // Do NOT use these functions, use Initialize2() and Update2(), as they are called in
@@ -54,6 +94,7 @@ public class Player : MonoBehaviour
         // Only used for asserts
         Assert.IsTrue(mSceneManager != null);
         Assert.IsTrue(mSceneManager.GetComponent<GameSceneManager>() != null);
+        Assert.IsTrue(GetComponent<Rigidbody>() != null);
     }
 	
 	void Update()

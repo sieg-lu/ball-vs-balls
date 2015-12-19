@@ -22,6 +22,7 @@ public class GameSceneManager : MonoBehaviour
     public float distanceAwayFromController = 3.14f;
     public float angleInDegreeBetweenCameraAndHorizon = 70.0f;
 
+    // Used prefabs, but make them into real GameObject at runtime (SetupScene())
     public GameObject[] players;
 
     // ----------- helper functions
@@ -36,6 +37,7 @@ public class GameSceneManager : MonoBehaviour
 
         for (int playerIndex= 0; !result && playerIndex < players.Length; playerIndex++)
         {
+            // Hacky, get the Player component before it's setup
             Player playerComponent = players[playerIndex].GetComponent<Player>();
             if (gridX == playerComponent.startGridX && gridZ == playerComponent.startGridZ)
             {
@@ -52,10 +54,10 @@ public class GameSceneManager : MonoBehaviour
         Assert.IsTrue(width > 0 && width < kMaxWidth);
         Assert.IsTrue(height > 0 && height < kMaxHeight);
 
-        float start_x = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (-width / 2.0f);
-        float start_z = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (-height / 2.0f);
-        float end_x = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (width / 2.0f);
-        float end_z = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (height / 2.0f);
+        float startX = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (-width / 2.0f);
+        float startZ = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (-height / 2.0f);
+        float endX = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (width / 2.0f);
+        float endZ = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (height / 2.0f);
 
         Assert.IsTrue(mBricksRoot == null);
         mBricksRoot = new GameObject();
@@ -63,21 +65,21 @@ public class GameSceneManager : MonoBehaviour
 
         int i = 0;
         int j = 0;
-        float current_x = start_x;
-        float current_z = start_z;
+        float currentX = startX;
+        float currentZ = startZ;
 
-        for (i = 0, current_x = start_x;
+        for (i = 0, currentX = startX;
              i < width;
-             i++, current_x += (mNormalBrickSize.x + kIntervalBetweenBlocks))
+             i++, currentX += (mNormalBrickSize.x + kIntervalBetweenBlocks))
         {
-            for (j = 0, current_z = start_z;
+            for (j = 0, currentZ = startZ;
                  j < height;
-                 j++, current_z += (mNormalBrickSize.z + kIntervalBetweenBlocks))
+                 j++, currentZ += (mNormalBrickSize.z + kIntervalBetweenBlocks))
             {
                 int playerId = -1;
                 bool isPlayerGrid = IsPlayerGrid(i, j, out playerId);
                 
-                Vector3 position = new Vector3(current_x, mNormalBrickSize.y / 2.0f + 0.01f, current_z);
+                Vector3 position = new Vector3(currentX, mNormalBrickSize.y / 2.0f + 0.01f, currentZ);
                 if (isPlayerGrid)
                 {
                     Assert.IsTrue(playerId != -1);
@@ -90,10 +92,10 @@ public class GameSceneManager : MonoBehaviour
                 }
                 else
                 {
-                    GameObject currentBrick = (GameObject)Instantiate(normalBrick, position, Quaternion.identity);
-
-                    currentBrick.name = "brick" + (i * height + j + 1).ToString();
-                    currentBrick.transform.parent = mBricksRoot.transform;
+//                     GameObject currentBrick = (GameObject)Instantiate(normalBrick, position, Quaternion.identity);
+// 
+//                     currentBrick.name = "brick" + (i * height + j + 1).ToString();
+//                     currentBrick.transform.parent = mBricksRoot.transform;
                 }
             }
         }
@@ -123,6 +125,14 @@ public class GameSceneManager : MonoBehaviour
         for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
         {
             players[playerIndex].GetComponent<Player>().Update2();
+        }
+    }
+
+    void FixedUpdate()
+    {
+        for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
+        {
+            players[playerIndex].GetComponent<Player>().SyncUpdate2();
         }
     }
 }

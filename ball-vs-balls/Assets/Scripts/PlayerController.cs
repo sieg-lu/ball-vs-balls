@@ -1,14 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Assertions;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class PlayerController : Player
 {
     // ----------- private variables
-
+    
     // ----------- public variables
 
     // ----------- helper functions
+    
+    public void PlayerMove()
+    {
+        // Get the axis and jump input.
+        float h = CrossPlatformInputManager.GetAxis("Horizontal");
+        float v = CrossPlatformInputManager.GetAxis("Vertical");
+        Transform cam = Camera.main.transform;
+
+        mJump = CrossPlatformInputManager.GetButton("Jump");
+
+        // calculate camera relative direction to move:
+        Vector3 camForward = Vector3.Scale(cam.forward, new Vector3(1, 0, 1)).normalized;
+        mMove = (v * camForward + h * cam.right).normalized;
+    }
 
     private void FixCamera()
     {
@@ -26,6 +41,11 @@ public class PlayerController : Player
         camera.gameObject.transform.LookAt(gameObject.transform);
     }
 
+    protected override void PostSpawnSpotLight()
+    {
+        mLightComponent.color = Color.white;
+    }
+
     // ----------- main functions
 
     public override void Initialize2(
@@ -37,20 +57,30 @@ public class PlayerController : Player
 
         Assert.IsTrue(mSceneManager != null);
         Assert.IsTrue(Camera.main != null);
+        
+        PostSpawnSpotLight();
     }
 
     public override void Update2()
     {
-        FixCamera();
         base.Update2();
+        PlayerMove();
     }
 
+    public override void SyncUpdate2()
+    {
+        base.SyncUpdate2();
+        FixCamera();
+    }
+
+    // Do NOT use these functions, use Initialize2() and Update2(), as they are called in
+    // scene manager, in this way we can unite the initialize and update functions
     void Start()
     {
-        
-	}
-	
-	void Update()
+        // Only used for asserts
+    }
+
+    void Update()
     {
 	
 	}
