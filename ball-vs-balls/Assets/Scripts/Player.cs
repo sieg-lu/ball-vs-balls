@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
     // ----------- private variables
 
     private int mMyId;
-    private GameObject mSceneManager;
+    protected GameObject mSceneManager;
 
     protected ePlayerType isController = ePlayerType._playerTypeInvalid;
 
@@ -15,8 +15,6 @@ public class Player : MonoBehaviour
 
     public int startGridX;
     public int startGridZ;
-
-    public GameObject sceneManager;
 
     public enum ePlayerType
     {
@@ -37,11 +35,11 @@ public class Player : MonoBehaviour
     // ----------- callback functions
 
     public virtual void Initialize2(
-        int myId,
-        GameObject sceneManager)
+        int inId,
+        GameObject inSceneManager)
     {
-        mMyId = myId;
-        mSceneManager = sceneManager;
+        mMyId = inId;
+        mSceneManager = inSceneManager;
     }
 
     public virtual void Update2()
@@ -54,8 +52,8 @@ public class Player : MonoBehaviour
     void Start()
     {
         // Only used for asserts
-        Assert.IsTrue(sceneManager != null);
-        Assert.IsTrue(sceneManager.GetComponent<GameSceneManager>() != null);
+        Assert.IsTrue(mSceneManager != null);
+        Assert.IsTrue(mSceneManager.GetComponent<GameSceneManager>() != null);
     }
 	
 	void Update()

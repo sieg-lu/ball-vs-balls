@@ -19,6 +19,9 @@ public class GameSceneManager : MonoBehaviour
     public int width = 50;
     public int height = 50;
 
+    public float distanceAwayFromController = 3.14f;
+    public float angleInDegreeBetweenCameraAndHorizon = 70.0f;
+
     public GameObject[] players;
 
     // ----------- helper functions
@@ -48,9 +51,6 @@ public class GameSceneManager : MonoBehaviour
     {
         Assert.IsTrue(width > 0 && width < kMaxWidth);
         Assert.IsTrue(height > 0 && height < kMaxHeight);
-
-        Assert.IsTrue(normalBrick != null);
-//        Assert.IsTrue(wallBrick != null);
 
         float start_x = (mNormalBrickSize.x + kIntervalBetweenBlocks) * (-width / 2.0f);
         float start_z = (mNormalBrickSize.z + kIntervalBetweenBlocks) * (-height / 2.0f);
@@ -82,10 +82,11 @@ public class GameSceneManager : MonoBehaviour
                 {
                     Assert.IsTrue(playerId != -1);
 
-                    GameObject currentPlayer = (GameObject)Instantiate(players[playerId], position, Quaternion.identity);
+                    players[playerId] = (GameObject)Instantiate(players[playerId], position, Quaternion.identity);
                     Player playerComponent = players[playerId].GetComponent<Player>();
 
-                    currentPlayer.name = playerComponent.IsController() ? "Control" : "Enemy " + playerId;
+                    playerComponent.Initialize2(playerId, gameObject);
+                    players[playerId].name = playerComponent.IsController() ? "Control" : "Enemy " + playerId;
                 }
                 else
                 {
@@ -100,6 +101,9 @@ public class GameSceneManager : MonoBehaviour
 
     void Initialize2()
     {
+        Assert.IsTrue(normalBrick != null);
+//        Assert.IsTrue(wallBrick != null);
+
         mNormalBrickSize = normalBrick.transform.localScale;
         Debug.Log("normal brick's size: " + mNormalBrickSize.ToString());
     }
@@ -109,14 +113,8 @@ public class GameSceneManager : MonoBehaviour
     {
         // Initialize section
         Initialize2();
-
-        for (int playerIndex= 0; playerIndex < players.Length; playerIndex++)
-        {
-            players[playerIndex].GetComponent<Player>().Initialize2(playerIndex, gameObject);
-        }
-
+        
         // Gameplay section
-
         SetupScene();
     }
 

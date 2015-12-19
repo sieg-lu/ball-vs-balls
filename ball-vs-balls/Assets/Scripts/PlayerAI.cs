@@ -1,12 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Assertions;
 
 public class PlayerAI : Player
 {
-    public override void Initialize2(int myId, GameObject sceneManager)
+    public override void Initialize2(
+        int inId,
+        GameObject inSceneManager)
     {
+        base.Initialize2(inId, inSceneManager);
         isController = ePlayerType._playerTypeAI;
-        base.Initialize2(myId, sceneManager);
+
+        Assert.IsTrue(mSceneManager != null);
     }
 
     public override void Update2()
